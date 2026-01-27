@@ -2,7 +2,7 @@
 
 /**
  * Script to add comprehensive data-testid attributes to UI components
- * Following UAT testing standards from .asif/Design-System/UI/data-testid-prompt.md
+ * Following UAT testing standards from .forge/Design-System/UI/data-testid-prompt.md
  */
 
 import * as fs from 'fs';

@@ -14,6 +14,8 @@ import { StateManager } from '../core/state';
 import { CoordinationService } from '../core/coordination';
 import { BootstrapService } from '../core/bootstrap';
 import { createPTYBridge, cleanupPTYBridge } from './pty-bridge';
+import { MCPSuggestionEngine } from '../orchestration/mcp-suggestion-engine';
+import { RunspaceManager } from '../core/runspace-manager';
 
 const app = express();
 const server = createServer(app);
@@ -33,6 +35,10 @@ const coordinationService = new CoordinationService();
 const orchestrator = new ForgeOrchestrator(visionManager, coordinationService);
 const stateManager = new StateManager();
 const bootstrapService = new BootstrapService(stateManager);
+// Use Claude Code CLI (user's Pro Max subscription) - no API key needed
+const mcpSuggestionEngine = new MCPSuggestionEngine();
+// Multi-project runspace manager
+const runspaceManager = new RunspaceManager();
 
 // WebSocket connection management
 const clients = new Set<WebSocket>();
@@ -160,6 +166,102 @@ app.post('/api/vision/capture', async (req, res) => {
     });
   }
 });
+
+// ============= MCP Suggestion Endpoints =============
+
+app.post('/api/mcp/suggestions', async (req, res) => {
+  try {
+    const { vision } = req.body;
+
+    // Transform vision data to VisionContext format
+    const visionContext = {
+      mission: vision.mission || '',
+      goals: vision.goals || [],
+      techStack: {
+        backend: extractTechStack(vision, 'backend'),
+        frontend: extractTechStack(vision, 'frontend'),
+        database: extractTechStack(vision, 'database')
+      },
+      features: vision.goals || [],
+      integrations: [],
+      industry: detectIndustry(vision)
+    };
+
+    console.log('🤖 Generating MCP suggestions for vision:', visionContext.mission);
+    const suggestions = await mcpSuggestionEngine.suggestMCPs(visionContext);
+
+    res.json({
+      success: true,
+      data: suggestions,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('MCP suggestion error:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/mcp/configure', async (req, res) => {
+  try {
+    const { selectedServers } = req.body;
+
+    // Generate .claude/mcp.json configuration
+    const mcpConfig = mcpSuggestionEngine.generateMCPConfig(selectedServers);
+    const setupGuide = mcpSuggestionEngine.generateSetupGuide(selectedServers);
+
+    res.json({
+      success: true,
+      data: {
+        config: mcpConfig,
+        setupGuide,
+        selectedServers
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Helper functions
+function extractTechStack(vision: any, category: string): string | undefined {
+  const text = JSON.stringify(vision).toLowerCase();
+  const patterns: Record<string, string[]> = {
+    backend: ['node', 'express', 'fastify', 'python', 'django', 'flask', 'go', 'rust'],
+    frontend: ['react', 'vue', 'angular', 'svelte', 'next', 'nuxt'],
+    database: ['postgres', 'mysql', 'mongodb', 'redis', 'sqlite']
+  };
+
+  for (const tech of patterns[category] || []) {
+    if (text.includes(tech)) return tech;
+  }
+  return undefined;
+}
+
+function detectIndustry(vision: any): string | undefined {
+  const text = JSON.stringify(vision).toLowerCase();
+  const industries: Record<string, string[]> = {
+    healthcare: ['health', 'medical', 'hipaa', 'patient'],
+    fintech: ['finance', 'banking', 'payment', 'crypto'],
+    ecommerce: ['shop', 'store', 'cart', 'checkout', 'product'],
+    saas: ['subscription', 'tenant', 'workspace']
+  };
+
+  for (const [industry, keywords] of Object.entries(industries)) {
+    if (keywords.some(keyword => text.includes(keyword))) {
+      return industry;
+    }
+  }
+  return undefined;
+}
 
 // ============= Project State Endpoints =============
 
@@ -474,6 +576,211 @@ app.get('/api/yolo/history', async (req, res) => {
   }
 });
 
+// ============= Runspace Endpoints =============
+
+app.post('/api/runspaces', async (req, res) => {
+  try {
+    const config = req.body;
+    const runspace = await runspaceManager.createRunspace(config);
+    broadcast('runspace.created', runspace);
+    res.json({
+      success: true,
+      data: runspace,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.get('/api/runspaces', async (req, res) => {
+  try {
+    const runspaces = runspaceManager.getAllRunspaces();
+    const activeRunspace = runspaceManager.getActiveRunspace();
+    res.json({
+      success: true,
+      data: {
+        runspaces,
+        activeRunspaceId: activeRunspace?.id || null
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.get('/api/runspaces/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const runspace = runspaceManager.getRunspace(id);
+    if (!runspace) {
+      return res.status(404).json({
+        success: false,
+        error: `Runspace not found: ${id}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    res.json({
+      success: true,
+      data: runspace,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.put('/api/runspaces/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const runspace = await runspaceManager.updateRunspace(id, updates);
+    broadcast('runspace.updated', runspace);
+    res.json({
+      success: true,
+      data: runspace,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.delete('/api/runspaces/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { deleteFiles } = req.query;
+    await runspaceManager.deleteRunspace(id, deleteFiles === 'true');
+    broadcast('runspace.deleted', { runspaceId: id });
+    res.json({
+      success: true,
+      data: { deleted: true },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/runspaces/:id/switch', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await runspaceManager.switchRunspace(id);
+    const runspace = runspaceManager.getActiveRunspace();
+    broadcast('runspace.activated', { runspaceId: id });
+    res.json({
+      success: true,
+      data: runspace,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/runspaces/:id/start', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await runspaceManager.startRunspace(id);
+    const runspace = runspaceManager.getRunspace(id);
+    broadcast('runspace.updated', runspace);
+    res.json({
+      success: true,
+      data: runspace,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/runspaces/:id/stop', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await runspaceManager.stopRunspace(id);
+    const runspace = runspaceManager.getRunspace(id);
+    broadcast('runspace.updated', runspace);
+    res.json({
+      success: true,
+      data: runspace,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/runspaces/:id/suspend', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await runspaceManager.suspendRunspace(id);
+    const runspace = runspaceManager.getRunspace(id);
+    broadcast('runspace.suspended', { runspaceId: id });
+    res.json({
+      success: true,
+      data: runspace,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.get('/api/runspaces/:id/health', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const health = await runspaceManager.getRunspaceHealth(id);
+    res.json({
+      success: true,
+      data: health,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // ============= Health Check =============
 
 app.get('/api/health', (req, res) => {
@@ -505,7 +812,7 @@ server.on('upgrade', (request, socket, head) => {
   // PTY bridge handles /terminal path in createPTYBridge
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`NXTG-Forge API Server running on port ${PORT}`);
   console.log(`WebSocket server available at ws://localhost:${PORT}/ws`);
 
@@ -515,16 +822,24 @@ server.listen(PORT, () => {
   stateManager.initialize();
   coordinationService.initialize();
 
-  // Initialize PTY Bridge for Claude Code Terminal
-  createPTYBridge(server);
+  // Initialize RunspaceManager for multi-project support
+  await runspaceManager.initialize();
+  console.log('RunspaceManager initialized');
+
+  // Initialize PTY Bridge for Claude Code Terminal (with runspace support)
+  createPTYBridge(server, runspaceManager);
   console.log(`PTY Bridge initialized at ws://localhost:${PORT}/terminal`);
 
   console.log('All services initialized successfully');
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('SIGTERM received, closing server...');
+
+  // Shutdown runspace manager
+  await runspaceManager.shutdown();
+  console.log('RunspaceManager shutdown complete');
 
   // Close WebSocket connections
   clients.forEach(client => {

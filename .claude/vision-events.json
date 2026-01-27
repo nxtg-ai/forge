@@ -1,0 +1,44 @@
+[
+  {
+    "id": "388dd39d404d0177",
+    "timestamp": "2026-01-27T02:48:16.261Z",
+    "type": "updated",
+    "actor": "user",
+    "data": {
+      "mission": "Mission: \"A 3d star fighter game\"\nGoals: fun pc game.. use direction keys to move and spacebar to shoot, beat levels that are progressively harder and a final boss, the star field is like a graph nodes in 3d space we fly around, keep score\nConstraints: a single HTML file\nMetrics: user is happy and earns badges\nTimeframe: ",
+      "currentFocus": "Mission: \"A 3d star fighter game\"\nGoals: fun pc game.. use direction keys to move and spacebar to shoot, beat levels that are progressively harder and a final boss, the star field is like a graph nodes in 3d space we fly around, keep score\nConstraints: a single HTML file\nMetrics: user is happy and earns badges\nTimeframe: "
+    },
+    "previousVersion": "1.0",
+    "newVersion": "1.1"
+  },
+  {
+    "id": "a11c680eb8f7c2d7",
+    "timestamp": "2026-01-27T02:56:41.131Z",
+    "type": "updated",
+    "actor": "user",
+    "data": {
+      "mission": "Mission: \"A 3d star fighter game\"\nGoals: fun pc game.. use direction keys to move and spacebar to shoot, beat levels that are progressively harder and a final boss, the star field is like a graph nodes in 3d space we fly around, keep score\nConstraints: a single HTML file\nMetrics: user is happy and earns badges\nTimeframe: 1 day",
+      "goals": [],
+      "constraints": [],
+      "successMetrics": [],
+      "timeframe": "Not set",
+      "createdAt": "2026-01-27T02:43:23.393Z",
+      "lastUpdated": "2026-01-27T02:56:41.100Z",
+      "version": 2
+    },
+    "previousVersion": "1.1",
+    "newVersion": "1.2"
+  },
+  {
+    "id": "dece4d18895ae812",
+    "timestamp": "2026-01-27T03:35:24.649Z",
+    "type": "updated",
+    "actor": "user",
+    "data": {
+      "mission": "Mission: test\nGoals: test\nConstraints: test\nMetrics: test\nTimeframe: ",
+      "currentFocus": "Mission: test\nGoals: test\nConstraints: test\nMetrics: test\nTimeframe: "
+    },
+    "previousVersion": "1.2",
+    "newVersion": "1.3"
+  }
+]

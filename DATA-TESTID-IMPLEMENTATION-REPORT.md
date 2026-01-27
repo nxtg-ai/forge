@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Successfully added comprehensive `data-testid` attributes to UI components following strict UAT testing standards as specified in `.asif/Design-System/UI/data-testid-prompt.md`.
+Successfully added comprehensive `data-testid` attributes to UI components following strict UAT testing standards as specified in `.forge/Design-System/UI/data-testid-prompt.md`.
 
 ## Implementation Date
 **Date:** January 25, 2026
