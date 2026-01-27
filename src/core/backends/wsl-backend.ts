@@ -148,6 +148,51 @@ export class WSLBackend implements IRunspaceBackend {
   }
 
   /**
+   * Create a default PTY session (no runspace required)
+   * Used when no runspaces exist - spawns a basic shell in current directory
+   */
+  async createDefaultPTY(): Promise<PTYSession> {
+    console.log(`[WSLBackend] Creating default PTY session`);
+
+    // Check if default session already exists
+    let session = this.sessions.get('default');
+    if (session) {
+      console.log(`[WSLBackend] Reusing existing default PTY session`);
+      return session;
+    }
+
+    // Spawn new PTY in current working directory
+    const shell = process.env.SHELL || '/bin/bash';
+    const pty = spawn(shell, [], {
+      name: 'xterm-256color',
+      cols: 80,
+      rows: 24,
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        TERM: 'xterm-256color',
+        COLORTERM: 'truecolor',
+        HOME: process.env.HOME,
+        USER: process.env.USER,
+        PATH: `${process.env.PATH}:/usr/local/bin:${process.env.HOME}/.local/bin`
+      }
+    });
+
+    session = {
+      id: `pty-default-${Date.now()}`,
+      runspaceId: 'default',
+      pty,
+      createdAt: new Date()
+    };
+
+    this.sessions.set('default', session);
+
+    console.log(`[WSLBackend] Default PTY created: ${session.id}, PID: ${pty.pid}`);
+
+    return session;
+  }
+
+  /**
    * Get PTY session for a runspace
    */
   getSession(runspaceId: string): PTYSession | undefined {

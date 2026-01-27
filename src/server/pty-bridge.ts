@@ -53,6 +53,8 @@ export function createPTYBridge(server: http.Server, runspaceManager: RunspaceMa
 
       // Get runspace (use active runspace if not specified)
       let runspace: Runspace | null | undefined = null;
+      let useDefaultShell = false;
+
       if (runspaceId) {
         runspace = runspaceManager.getRunspace(runspaceId);
         if (!runspace) {
@@ -65,30 +67,33 @@ export function createPTYBridge(server: http.Server, runspaceManager: RunspaceMa
           return;
         }
       } else {
-        // Fallback to active runspace
+        // Try to use active runspace
         runspace = runspaceManager.getActiveRunspace();
         if (!runspace) {
-          console.error('[PTY Bridge] No active runspace');
-          ws.send(JSON.stringify({
-            type: 'error',
-            data: 'No active runspace. Please create or switch to a runspace.'
-          }));
-          ws.close();
-          return;
+          // No runspace specified and none active - use default shell mode
+          console.log('[PTY Bridge] No active runspace, using default shell mode');
+          useDefaultShell = true;
         }
       }
 
-      console.log(`[PTY Bridge] Attaching PTY to runspace: ${runspace.displayName} (${runspace.id})`);
+      let ptySession: any;
 
-      // Use WSL backend to attach PTY for this runspace
-      const ptySession = await wslBackend.attachPTY(runspace);
+      if (useDefaultShell) {
+        // Default mode: spawn a basic PTY in current working directory
+        console.log('[PTY Bridge] Creating default PTY session');
+        ptySession = await wslBackend.createDefaultPTY();
+      } else {
+        // Runspace mode: attach PTY to specific runspace
+        console.log(`[PTY Bridge] Attaching PTY to runspace: ${runspace!.displayName} (${runspace!.id})`);
+        ptySession = await wslBackend.attachPTY(runspace!);
+      }
 
       // Generate session ID
       const sessionId = Math.random().toString(36).substring(7);
 
       // Store session
       const session: TerminalSession = {
-        runspaceId: runspace.id,
+        runspaceId: runspace?.id || 'default',
         sessionId,
         ws,
         commandBuffer: ''
@@ -97,7 +102,7 @@ export function createPTYBridge(server: http.Server, runspaceManager: RunspaceMa
 
       // Send PTY output to WebSocket
       ptySession.pty.onData((data: string) => {
-        console.log(`[PTY Bridge] PTY data received: ${JSON.stringify(data.substring(0, 100))}`);
+        // Only log errors, not every keystroke/output
         if (ws.readyState === WebSocket.OPEN) {
           // Intercept special patterns for enhanced UI
           const enrichedData = interceptOutput(data, ws);
@@ -157,7 +162,8 @@ export function createPTYBridge(server: http.Server, runspaceManager: RunspaceMa
         console.log('[PTY Bridge] WebSocket closed');
         ptySession.pty.kill();
         sessions.delete(sessionId);
-        wslBackend.removeSession(runspace.id);
+        // Remove session from backend (use 'default' if no runspace)
+        wslBackend.removeSession(runspace?.id || 'default');
       });
 
       // Handle WebSocket errors
@@ -165,7 +171,8 @@ export function createPTYBridge(server: http.Server, runspaceManager: RunspaceMa
         console.error('[PTY Bridge] WebSocket error:', error);
         ptySession.pty.kill();
         sessions.delete(sessionId);
-        wslBackend.removeSession(runspace.id);
+        // Remove session from backend (use 'default' if no runspace)
+        wslBackend.removeSession(runspace?.id || 'default');
       });
     } catch (error) {
       console.error('[PTY Bridge] Fatal error in connection handler:', error);
