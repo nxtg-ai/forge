@@ -4,6 +4,7 @@ import type { GovernanceState } from '../../types/governance.types';
 import { ConstitutionCard } from './ConstitutionCard';
 import { ImpactMatrix } from './ImpactMatrix';
 import { OracleFeed } from './OracleFeed';
+import { StrategicAdvisor } from './StrategicAdvisor';
 
 interface GovernanceHUDProps {
   className?: string;
@@ -88,6 +89,7 @@ export const GovernanceHUD: React.FC<GovernanceHUDProps> = ({ className }) => {
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-2 p-2">
+        <StrategicAdvisor state={state} />
         <ConstitutionCard constitution={state.constitution} />
         <ImpactMatrix workstreams={state.workstreams} />
         <OracleFeed logs={state.sentinelLog} />
