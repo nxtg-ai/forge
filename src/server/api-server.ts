@@ -19,10 +19,15 @@ import { RunspaceManager } from '../core/runspace-manager';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { GovernanceState } from '../types/governance.types';
+import { GovernanceStateManager } from '../services/governance-state-manager';
 
 const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ noServer: true });
+
+// Initialize Governance State Manager
+const projectRoot = process.cwd();
+const governanceStateManager = new GovernanceStateManager(projectRoot);
 
 // Middleware
 app.use(cors({
@@ -727,6 +732,83 @@ app.get('/api/governance/config', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to read governance config',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/governance/sentinel', async (req, res) => {
+  try {
+    const entry = req.body;
+
+    // Validate required fields
+    if (!entry.type || !entry.source || !entry.message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: type, source, message',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Append log using state manager (includes automatic rotation)
+    await governanceStateManager.appendSentinelLog(entry);
+
+    res.json({
+      success: true,
+      message: 'Sentinel log entry added',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to append sentinel log',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.get('/api/governance/validate', async (req, res) => {
+  try {
+    const result = await governanceStateManager.validateStateIntegrity();
+
+    res.json({
+      success: true,
+      data: result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to validate state',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.get('/api/governance/backup/latest', async (req, res) => {
+  try {
+    const backup = await governanceStateManager.getLatestBackup();
+
+    if (!backup) {
+      return res.status(404).json({
+        success: false,
+        error: 'No backups found',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    res.json({
+      success: true,
+      data: backup,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve backup',
       message: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     });
