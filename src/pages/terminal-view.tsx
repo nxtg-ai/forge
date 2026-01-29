@@ -8,26 +8,40 @@ import { ClaudeTerminal, DiffVisualization, ContextWindowHUD } from '../componen
 import { motion } from 'framer-motion';
 import { Terminal, X, Layout, Maximize2 } from 'lucide-react';
 import { applyDiff, rejectDiff } from '../api/diff-service';
+import { useToast } from '../components/feedback/ToastSystem';
 
 const TerminalView: React.FC = () => {
   const [showDiffPanel, setShowDiffPanel] = useState(true);
   const [showContextPanel, setShowContextPanel] = useState(true);
+  const { toast } = useToast();
 
   const handleApplyDiff = async (filePath: string) => {
     const result = await applyDiff(filePath);
     if (result.success) {
-      console.log('✅', result.message);
+      toast.success('Changes applied', {
+        message: `Successfully applied changes to ${filePath}`,
+        duration: 3000
+      });
     } else {
-      console.error('❌', result.message);
+      toast.error('Failed to apply changes', {
+        message: result.message,
+        details: result.error
+      });
     }
   };
 
   const handleRejectDiff = async (filePath: string) => {
     const result = await rejectDiff(filePath);
     if (result.success) {
-      console.log('✅', result.message);
+      toast.info('Changes rejected', {
+        message: `Rejected changes to ${filePath}`,
+        duration: 3000
+      });
     } else {
-      console.error('❌', result.message);
+      toast.error('Failed to reject changes', {
+        message: result.message,
+        details: result.error
+      });
     }
   };
 
