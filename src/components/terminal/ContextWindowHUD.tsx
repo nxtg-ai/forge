@@ -224,6 +224,7 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
           onAdd={handleAddMemory}
           onEdit={handleEditMemory}
           onDelete={handleDeleteMemory}
+          hasFiles={contextData.files.length > 0}
         />
       </div>
 

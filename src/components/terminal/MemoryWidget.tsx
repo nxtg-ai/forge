@@ -31,6 +31,7 @@ interface MemoryWidgetProps {
   onEdit: (id: string, content: string, tags: string[]) => void;
   onDelete: (id: string) => void;
   className?: string;
+  hasFiles?: boolean;
 }
 
 export const MemoryWidget: React.FC<MemoryWidgetProps> = ({
@@ -38,7 +39,8 @@ export const MemoryWidget: React.FC<MemoryWidgetProps> = ({
   onAdd,
   onEdit,
   onDelete,
-  className = ''
+  className = '',
+  hasFiles = false
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -185,7 +187,10 @@ export const MemoryWidget: React.FC<MemoryWidgetProps> = ({
       )}
 
       {/* Memory Items */}
-      <div className="space-y-2 max-h-96 overflow-y-auto">
+      <div className={hasFiles
+        ? "space-y-2 max-h-64 overflow-y-auto"
+        : "space-y-2 flex-1 min-h-0 overflow-y-auto"
+      }>
         {items.length === 0 ? (
           <div className="text-center py-8 text-gray-500 text-xs">
             <Brain className="w-8 h-8 mx-auto mb-2 opacity-20" />
