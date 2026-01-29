@@ -131,3 +131,60 @@ src/services/
 All goals achieved. Foundation for autonomous operation established.
 
 **Critical lesson internalized:** Use Claude Code's native capabilities. Don't build TypeScript meta-services. Dog-food or die.
+
+---
+
+## Post-Week 1 Enhancements (Overnight Session)
+
+**Date:** January 29, 2026
+
+### Gap #4: Task-Level Checkpoints ✅
+**Implementation:**
+- `src/core/checkpoint-manager.ts` (280 lines)
+- `src/core/__tests__/checkpoint-manager.test.ts` (22 tests, ALL PASSING)
+- `.claude/commands/[FRG]-checkpoint.md` (CLI interface)
+- File-based storage (`.forge/checkpoints/{taskId}.json`)
+
+**Features:**
+- Save/restore task state with progress tracking
+- Cleanup old checkpoints automatically
+- Crash recovery support
+- Real file operations (not mocked)
+
+**Test Results:** 22/22 passing in 275ms
+
+### Enhancement: CEO-LOOP Full Autonomy ✅
+**Changes:**
+- Added `Task, Write, Edit` tools to CEO-LOOP frontmatter
+- Can now delegate to Builder/Guardian/Detective agents
+- Can create decision logs and strategic docs
+- Full autonomous operation capability unlocked
+
+### Enhancement: Memory Widgets in Terminal UI ✅
+**Implementation:**
+- `src/components/terminal/MemoryWidget.tsx` (365 lines)
+- Editable memory items in Context panel (left sidebar)
+- Categories: decision, instruction, learning, context, other
+- Tags support + inline editing + delete
+- localStorage persistence (survives restarts)
+
+**UI Features:**
+- Add memory with category picker
+- Edit inline with save/cancel
+- Delete with confirmation UX
+- Timestamp tracking
+- Toggles with "Context ON" button
+
+**Final Stats:**
+- Week 1 Core Goals: 4/4 ✅
+- Bonus Gaps Closed: 1 (checkpoints)
+- UI Enhancements: 1 (memory widgets)
+- **Total: 5 critical capabilities delivered**
+
+**Critical Incident:**
+- JavaScript heap OOM at ~4GB during CEO-LOOP invocation
+- All work committed safely before crash (commit 982ed7b)
+- Resolution: Increased NODE_OPTIONS to 8GB heap
+- Lesson: Use focused, lightweight invocations for CEO-LOOP
+
+**Next:** Continue autonomous operation with memory-efficient approach. Ready for Week 2 goals.
