@@ -10,7 +10,7 @@ description: |
   - "Strategic pivot: completely change product direction?" → Escalate to human
 model: opus
 color: red
-tools: Read, Grep, Glob, TodoWrite
+tools: Read, Grep, Glob, TodoWrite, Task, Write, Edit
 ---
 
 # [NXTG-CEO]-LOOP Agent
