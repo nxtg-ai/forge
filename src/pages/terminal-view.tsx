@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { ClaudeTerminal, ContextWindowHUD } from '../components/terminal';
 import { GovernanceHUD } from '../components/governance';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, X, Layout, Maximize2, Info } from 'lucide-react';
 import { useToast } from '../components/feedback/ToastSystem';
@@ -90,7 +91,11 @@ const TerminalView: React.FC = () => {
         </main>
 
         {/* Right Sidebar - Governance HUD */}
-        {showGovernancePanel && <GovernanceHUD />}
+        {showGovernancePanel && (
+          <ErrorBoundary fallbackMessage="Governance HUD encountered an error. The terminal remains functional.">
+            <GovernanceHUD />
+          </ErrorBoundary>
+        )}
       </div>
 
       {/* Help Overlay - Collapsible */}
