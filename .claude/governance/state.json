@@ -19,34 +19,53 @@
       "name": "Governance HUD Implementation",
       "description": "Build the core governance visualization system",
       "status": "active",
-      "risk": "medium",
+      "risk": "low",
       "owner": "forge-builder",
       "dependencies": [],
       "startedAt": "2026-01-29T08:00:00Z",
-      "progress": 15,
+      "progress": 73,
       "metrics": {
-        "progress": 15,
-        "tasksCompleted": 2,
+        "progress": 73,
+        "tasksCompleted": 8,
         "totalTasks": 11,
         "blockers": 0
-      }
+      },
+      "tasks": [
+        {"id": "t1", "name": "Create governance data schema", "status": "completed"},
+        {"id": "t2", "name": "Build GovernanceHUD container component", "status": "completed"},
+        {"id": "t3", "name": "Implement ConstitutionCard component", "status": "completed"},
+        {"id": "t4", "name": "Implement ImpactMatrix component", "status": "completed"},
+        {"id": "t5", "name": "Implement OracleFeed component", "status": "completed"},
+        {"id": "t6", "name": "Create API endpoint for governance state", "status": "completed"},
+        {"id": "t7", "name": "Fix Vite proxy configuration", "status": "completed"},
+        {"id": "t8", "name": "Integrate with terminal-view page", "status": "completed"},
+        {"id": "t9", "name": "Add WebSocket real-time updates", "status": "pending"},
+        {"id": "t10", "name": "Add governance rule configuration", "status": "pending"},
+        {"id": "t11", "name": "Add historical trend visualization", "status": "pending"}
+      ]
     },
     {
       "id": "gov-002",
       "name": "Agent Integration Layer",
       "description": "Enable agents to update governance state",
-      "status": "pending",
+      "status": "active",
       "risk": "low",
-      "owner": "forge-builder",
+      "owner": "forge-oracle",
       "dependencies": ["gov-001"],
       "startedAt": "2026-01-29T08:00:00Z",
-      "progress": 0,
+      "progress": 75,
       "metrics": {
-        "progress": 0,
-        "tasksCompleted": 0,
+        "progress": 75,
+        "tasksCompleted": 3,
         "totalTasks": 4,
         "blockers": 0
-      }
+      },
+      "tasks": [
+        {"id": "t1", "name": "Create forge-oracle agent definition", "status": "completed"},
+        {"id": "t2", "name": "Wire hooks in settings.json", "status": "completed"},
+        {"id": "t3", "name": "Integrate oracle with orchestrator", "status": "completed"},
+        {"id": "t4", "name": "Create helper library for agents to write sentinel logs", "status": "pending"}
+      ]
     }
   ],
   "sentinelLog": [
@@ -100,6 +119,29 @@
         "capabilities": ["scope_validation", "drift_detection", "governance_compliance"],
         "mode": "event-driven",
         "status": "active"
+      },
+      "actionRequired": false
+    },
+    {
+      "id": "log-005",
+      "timestamp": 1738235000000,
+      "type": "INFO",
+      "severity": "medium",
+      "category": "scope",
+      "source": "forge-oracle",
+      "message": "Governance status update: Core HUD at 73%, Agent layer at 75%",
+      "context": {
+        "workstreams": {
+          "gov-001": "8/11 tasks complete - UI fully functional with polling",
+          "gov-002": "3/4 tasks complete - Oracle monitoring active"
+        },
+        "pending": [
+          "WebSocket real-time updates",
+          "Governance rule configuration",
+          "Historical trend visualization",
+          "Agent helper library for sentinel logs"
+        ],
+        "mvp_status": "Operational - HUD displays live data, Oracle monitors changes"
       },
       "actionRequired": false
     }
