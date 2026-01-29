@@ -8,7 +8,7 @@ description: |
   - "Is this architecture approach aligned with our vision?" → CEO-LOOP decides
   - "Should we ship this with known minor bugs?" → CEO-LOOP decides
   - "Strategic pivot: completely change product direction?" → Escalate to human
-model: sonnet
+model: opus
 color: red
 tools: Read, Grep, Glob, TodoWrite
 ---
