@@ -5,14 +5,15 @@
 
 import React, { useState } from 'react';
 import { ClaudeTerminal, DiffVisualization, ContextWindowHUD } from '../components/terminal';
-import { motion } from 'framer-motion';
-import { Terminal, X, Layout, Maximize2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Terminal, X, Layout, Maximize2, Info } from 'lucide-react';
 import { applyDiff, rejectDiff } from '../api/diff-service';
 import { useToast } from '../components/feedback/ToastSystem';
 
 const TerminalView: React.FC = () => {
   const [showDiffPanel, setShowDiffPanel] = useState(true);
   const [showContextPanel, setShowContextPanel] = useState(true);
+  const [showHelpOverlay, setShowHelpOverlay] = useState(false);
   const { toast } = useToast();
 
   const handleApplyDiff = async (filePath: string) => {
@@ -127,24 +128,64 @@ const TerminalView: React.FC = () => {
         )}
       </div>
 
-      {/* Help Overlay */}
-      <div className="fixed bottom-4 left-4 z-20">
-        <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-lg px-4 py-2">
-          <div className="text-xs space-y-1">
-            <div className="flex items-center gap-2 text-gray-400">
-              <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Ctrl+C</kbd>
-              <span>Cancel command</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-400">
-              <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Ctrl+L</kbd>
-              <span>Clear terminal</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-400">
-              <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">↑/↓</kbd>
-              <span>Command history</span>
-            </div>
-          </div>
-        </div>
+      {/* Help Overlay - Collapsible */}
+      <div className="fixed bottom-4 left-4 z-20" data-testid="help-overlay">
+        <AnimatePresence mode="wait">
+          {showHelpOverlay ? (
+            /* Expanded - Keyboard Shortcuts */
+            <motion.div
+              key="expanded"
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-lg px-4 py-3"
+              data-testid="help-overlay-expanded"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-xs font-semibold text-gray-300">Keyboard Shortcuts</h4>
+                <button
+                  onClick={() => setShowHelpOverlay(false)}
+                  className="p-0.5 rounded hover:bg-gray-800 transition-colors"
+                  data-testid="help-overlay-close-btn"
+                  title="Close"
+                >
+                  <X className="w-3.5 h-3.5 text-gray-500" />
+                </button>
+              </div>
+              <div className="text-xs space-y-1">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Ctrl+C</kbd>
+                  <span>Cancel command</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">Ctrl+L</kbd>
+                  <span>Clear terminal</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <kbd className="px-1.5 py-0.5 bg-gray-800 rounded text-xs">↑/↓</kbd>
+                  <span>Command history</span>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            /* Collapsed - Info Icon */
+            <motion.button
+              key="collapsed"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setShowHelpOverlay(true)}
+              className="p-3 bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-full
+                       hover:bg-gray-800 hover:border-purple-500/30 transition-all group"
+              data-testid="help-overlay-toggle-btn"
+              title="Show keyboard shortcuts"
+            >
+              <Info className="w-5 h-5 text-gray-500 group-hover:text-purple-400 transition-colors" />
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
