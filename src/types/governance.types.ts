@@ -321,3 +321,119 @@ export const DEFAULT_WORKSTREAM: Partial<Workstream> = {
     blockers: 0,
   },
 };
+
+/**
+ * Governance configuration schema
+ * Loaded from .claude/governance/config.json
+ */
+export interface GovernanceConfig {
+  version: string;
+  description?: string;
+  thresholds: GovernanceThresholds;
+  polling: PollingConfig;
+  sentinelLog: SentinelLogConfig;
+  stateManagement: StateManagementConfig;
+  oracle: OracleConfig;
+  ui: UIConfig;
+  notifications: NotificationConfig;
+}
+
+export interface GovernanceThresholds {
+  criticalErrorLimit: number;
+  blockTimeoutMinutes: number;
+  minConfidence: number;
+  maxRiskLevel: RiskLevel;
+  warningThreshold: number;
+}
+
+export interface PollingConfig {
+  enabled: boolean;
+  intervalMs: number;
+  timeoutMs: number;
+}
+
+export interface SentinelLogConfig {
+  maxEntries: number;
+  retentionDays: number;
+  persistCritical: boolean;
+  autoRotate: boolean;
+}
+
+export interface StateManagementConfig {
+  backupEnabled: boolean;
+  backupIntervalMinutes: number;
+  maxBackups: number;
+  validationEnabled: boolean;
+}
+
+export interface OracleConfig {
+  enabled: boolean;
+  confidenceThreshold: number;
+  categories: Record<string, { enabled: boolean; severity: string }>;
+}
+
+export interface UIConfig {
+  refreshInterval: number;
+  showDebugInfo: boolean;
+  enableAnimations: boolean;
+  compactMode: boolean;
+}
+
+export interface NotificationConfig {
+  enabled: boolean;
+  criticalOnly: boolean;
+  soundEnabled: boolean;
+  desktopNotifications: boolean;
+}
+
+/**
+ * Default configuration values
+ */
+export const DEFAULT_GOVERNANCE_CONFIG: GovernanceConfig = {
+  version: '1.0.0',
+  thresholds: {
+    criticalErrorLimit: 3,
+    blockTimeoutMinutes: 10,
+    minConfidence: 50,
+    maxRiskLevel: 'high',
+    warningThreshold: 5,
+  },
+  polling: {
+    enabled: true,
+    intervalMs: 2000,
+    timeoutMs: 5000,
+  },
+  sentinelLog: {
+    maxEntries: 1000,
+    retentionDays: 7,
+    persistCritical: true,
+    autoRotate: true,
+  },
+  stateManagement: {
+    backupEnabled: true,
+    backupIntervalMinutes: 60,
+    maxBackups: 24,
+    validationEnabled: true,
+  },
+  oracle: {
+    enabled: true,
+    confidenceThreshold: 80,
+    categories: {
+      scope: { enabled: true, severity: 'medium' },
+      drift: { enabled: true, severity: 'high' },
+      governance: { enabled: true, severity: 'critical' },
+    },
+  },
+  ui: {
+    refreshInterval: 2000,
+    showDebugInfo: false,
+    enableAnimations: true,
+    compactMode: false,
+  },
+  notifications: {
+    enabled: true,
+    criticalOnly: false,
+    soundEnabled: false,
+    desktopNotifications: true,
+  },
+};

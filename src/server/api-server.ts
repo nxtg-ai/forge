@@ -695,6 +695,44 @@ app.get('/api/governance/state', async (req, res) => {
   }
 });
 
+app.get('/api/governance/config', async (req, res) => {
+  try {
+    const projectRoot = process.cwd();
+    const configPath = path.join(projectRoot, '.claude/governance/config.json');
+
+    try {
+      const data = await fs.readFile(configPath, 'utf-8');
+      const config = JSON.parse(data);
+
+      res.json({
+        success: true,
+        data: config,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      if (error.code === 'ENOENT') {
+        // Return default config if file doesn't exist
+        const { DEFAULT_GOVERNANCE_CONFIG } = await import('../types/governance.types.js');
+        res.json({
+          success: true,
+          data: DEFAULT_GOVERNANCE_CONFIG,
+          timestamp: new Date().toISOString(),
+          message: 'Using default configuration (config.json not found)'
+        });
+      } else {
+        throw error;
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to read governance config',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // ============= Diff Endpoints =============
 
 app.post('/api/diffs/apply', async (req, res) => {
