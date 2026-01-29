@@ -23,10 +23,10 @@
       "owner": "forge-builder",
       "dependencies": [],
       "startedAt": "2026-01-29T08:00:00Z",
-      "progress": 73,
+      "progress": 100,
       "metrics": {
-        "progress": 73,
-        "tasksCompleted": 8,
+        "progress": 100,
+        "tasksCompleted": 11,
         "totalTasks": 11,
         "blockers": 0
       },
@@ -39,9 +39,9 @@
         {"id": "t6", "name": "Create API endpoint for governance state", "status": "completed"},
         {"id": "t7", "name": "Fix Vite proxy configuration", "status": "completed"},
         {"id": "t8", "name": "Integrate with terminal-view page", "status": "completed"},
-        {"id": "t9", "name": "Add WebSocket real-time updates", "status": "pending"},
-        {"id": "t10", "name": "Add governance rule configuration", "status": "pending"},
-        {"id": "t11", "name": "Add historical trend visualization", "status": "pending"}
+        {"id": "t9", "name": "Add configuration system (Stability #1)", "status": "completed"},
+        {"id": "t10", "name": "Add state rotation and backups (Stability #2)", "status": "completed"},
+        {"id": "t11", "name": "Add error boundary and documentation (Stability #3-4)", "status": "completed"}
       ]
     },
     {
@@ -53,10 +53,10 @@
       "owner": "forge-oracle",
       "dependencies": ["gov-001"],
       "startedAt": "2026-01-29T08:00:00Z",
-      "progress": 75,
+      "progress": 100,
       "metrics": {
-        "progress": 75,
-        "tasksCompleted": 3,
+        "progress": 100,
+        "tasksCompleted": 4,
         "totalTasks": 4,
         "blockers": 0
       },
@@ -64,7 +64,7 @@
         {"id": "t1", "name": "Create forge-oracle agent definition", "status": "completed"},
         {"id": "t2", "name": "Wire hooks in settings.json", "status": "completed"},
         {"id": "t3", "name": "Integrate oracle with orchestrator", "status": "completed"},
-        {"id": "t4", "name": "Create helper library for agents to write sentinel logs", "status": "pending"}
+        {"id": "t4", "name": "Document agent protocol guidelines (AGENT_PROTOCOL.md)", "status": "completed"}
       ]
     }
   ],
