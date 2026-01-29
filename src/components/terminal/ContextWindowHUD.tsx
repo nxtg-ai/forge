@@ -222,7 +222,10 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
       </div>
 
       {/* Files Heat Map */}
-      <div className="flex-1 overflow-y-auto min-h-0" data-testid="context-window-files-section">
+      <div
+        className={contextData.files.length > 0 ? "flex-1 overflow-y-auto min-h-0" : "overflow-y-auto"}
+        data-testid="context-window-files-section"
+      >
         <div className="p-2 space-y-1">
           <AnimatePresence mode="popLayout">
             {contextData.files.map((file, index) => (
