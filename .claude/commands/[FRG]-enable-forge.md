@@ -12,7 +12,7 @@ First, verify forge is properly initialized:
 
 ```bash
 # Check if orchestrator agent exists
-if [ ! -f .claude/agents/agent-forge-orchestrator.md ]; then
+if [ ! -f ".claude/agents/[AFRG]-orchestrator.md" ]; then
   echo "❌ NXTG-Forge not initialized"
   echo ""
   echo "Please run: /init"
@@ -21,11 +21,11 @@ fi
 
 # Check if required agents exist
 REQUIRED_AGENTS=(
-  "agent-forge-orchestrator"
-  "agent-forge-detective"
-  "agent-forge-planner"
-  "agent-forge-builder"
-  "agent-forge-guardian"
+  "[AFRG]-orchestrator"
+  "[AFRG]-detective"
+  "[AFRG]-planner"
+  "[AFRG]-builder"
+  "[AFRG]-guardian"
 )
 
 MISSING_COUNT=0
