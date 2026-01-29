@@ -1,50 +1,20 @@
 /**
  * Terminal View Page
- * Full-screen view with Claude Code Terminal + Diff Visualization + Context Window HUD
+ * Full-screen view with Claude Code Terminal + Governance HUD + Context Window HUD
  */
 
 import React, { useState } from 'react';
-import { ClaudeTerminal, DiffVisualization, ContextWindowHUD } from '../components/terminal';
+import { ClaudeTerminal, ContextWindowHUD } from '../components/terminal';
+import { GovernanceHUD } from '../components/governance';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, X, Layout, Maximize2, Info } from 'lucide-react';
-import { applyDiff, rejectDiff } from '../api/diff-service';
 import { useToast } from '../components/feedback/ToastSystem';
 
 const TerminalView: React.FC = () => {
-  const [showDiffPanel, setShowDiffPanel] = useState(true);
+  const [showGovernancePanel, setShowGovernancePanel] = useState(true);
   const [showContextPanel, setShowContextPanel] = useState(true);
   const [showHelpOverlay, setShowHelpOverlay] = useState(false);
   const { toast } = useToast();
-
-  const handleApplyDiff = async (filePath: string) => {
-    const result = await applyDiff(filePath);
-    if (result.success) {
-      toast.success('Changes applied', {
-        message: `Successfully applied changes to ${filePath}`,
-        duration: 3000
-      });
-    } else {
-      toast.error('Failed to apply changes', {
-        message: result.message,
-        details: result.error
-      });
-    }
-  };
-
-  const handleRejectDiff = async (filePath: string) => {
-    const result = await rejectDiff(filePath);
-    if (result.success) {
-      toast.info('Changes rejected', {
-        message: `Rejected changes to ${filePath}`,
-        duration: 3000
-      });
-    } else {
-      toast.error('Failed to reject changes', {
-        message: result.message,
-        details: result.error
-      });
-    }
-  };
 
   const handleDangerousCommand = async (command: string): Promise<boolean> => {
     // This returns true if user approves, false if they cancel
@@ -78,15 +48,15 @@ const TerminalView: React.FC = () => {
                 Context {showContextPanel ? 'ON' : 'OFF'}
               </button>
               <button
-                onClick={() => setShowDiffPanel(!showDiffPanel)}
+                onClick={() => setShowGovernancePanel(!showGovernancePanel)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  showDiffPanel
-                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  showGovernancePanel
+                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                     : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                 }`}
-                title="Toggle Diff Panel"
+                title="Toggle Governance Panel"
               >
-                Diffs {showDiffPanel ? 'ON' : 'OFF'}
+                Governance {showGovernancePanel ? 'ON' : 'OFF'}
               </button>
             </div>
           </div>
@@ -119,13 +89,8 @@ const TerminalView: React.FC = () => {
           />
         </main>
 
-        {/* Right Sidebar - Diff Visualization */}
-        {showDiffPanel && (
-          <DiffVisualization
-            onApply={handleApplyDiff}
-            onReject={handleRejectDiff}
-          />
-        )}
+        {/* Right Sidebar - Governance HUD */}
+        {showGovernancePanel && <GovernanceHUD />}
       </div>
 
       {/* Help Overlay - Collapsible */}

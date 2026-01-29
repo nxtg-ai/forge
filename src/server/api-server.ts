@@ -16,6 +16,9 @@ import { BootstrapService } from '../core/bootstrap';
 import { createPTYBridge, cleanupPTYBridge } from './pty-bridge';
 import { MCPSuggestionEngine } from '../orchestration/mcp-suggestion-engine';
 import { RunspaceManager } from '../core/runspace-manager';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { GovernanceState } from '../types/governance.types';
 
 const app = express();
 const server = createServer(app);
@@ -649,6 +652,44 @@ app.get('/api/memory/seed', async (_req, res) => {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// ============= Governance Endpoints =============
+
+app.get('/api/governance/state', async (req, res) => {
+  try {
+    const projectRoot = process.cwd();
+    const governancePath = path.join(projectRoot, '.claude/governance/state.json');
+
+    try {
+      const data = await fs.readFile(governancePath, 'utf-8');
+      const state: GovernanceState = JSON.parse(data);
+
+      res.json({
+        success: true,
+        data: state,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      if (error.code === 'ENOENT') {
+        res.status(404).json({
+          success: false,
+          error: 'Governance state not found',
+          message: 'Initialize governance with seed data first',
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        throw error; // Re-throw to be caught by outer catch
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to read governance state',
+      message: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     });
   }
