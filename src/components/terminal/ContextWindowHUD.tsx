@@ -14,6 +14,7 @@ import {
   Eye,
   Layers
 } from 'lucide-react';
+import { MemoryWidget, type MemoryItem } from './MemoryWidget';
 
 interface ContextFile {
   path: string;
@@ -42,6 +43,55 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
     maxTokens: 200000,
     currentThought: ''
   });
+
+  const [memoryItems, setMemoryItems] = useState<MemoryItem[]>([]);
+
+  // Load memory from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('forge-memory');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setMemoryItems(parsed.map((item: any) => ({
+          ...item,
+          created: new Date(item.created),
+          updated: new Date(item.updated)
+        })));
+      } catch (e) {
+        console.error('Failed to load memory:', e);
+      }
+    }
+  }, []);
+
+  // Save memory to localStorage whenever it changes
+  const saveMemory = (items: MemoryItem[]) => {
+    setMemoryItems(items);
+    localStorage.setItem('forge-memory', JSON.stringify(items));
+  };
+
+  const handleAddMemory = (content: string, category: MemoryItem['category'], tags: string[]) => {
+    const newItem: MemoryItem = {
+      id: crypto.randomUUID(),
+      content,
+      tags,
+      category,
+      created: new Date(),
+      updated: new Date()
+    };
+    saveMemory([...memoryItems, newItem]);
+  };
+
+  const handleEditMemory = (id: string, content: string, tags: string[]) => {
+    saveMemory(memoryItems.map(item =>
+      item.id === id
+        ? { ...item, content, tags, updated: new Date() }
+        : item
+    ));
+  };
+
+  const handleDeleteMemory = (id: string) => {
+    saveMemory(memoryItems.filter(item => item.id !== id));
+  };
 
   useEffect(() => {
     // Listen for context events from ClaudeTerminal
@@ -85,15 +135,11 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
     }
   };
 
-  if (contextData.files.length === 0) {
-    return null;
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className={`bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-xl shadow-2xl ${className}`}
+      className={`bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-xl shadow-2xl flex flex-col ${className}`}
       data-testid="context-window-hud"
     >
       {/* Header */}
@@ -101,10 +147,10 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-purple-400" />
-            <h3 className="font-semibold text-sm">Context Window</h3>
+            <h3 className="font-semibold text-sm">Context & Memory</h3>
           </div>
           <div className="text-xs text-gray-500">
-            {contextData.files.length} files loaded
+            {contextData.files.length} files
           </div>
         </div>
 
@@ -143,8 +189,18 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
         </div>
       )}
 
+      {/* Memory Section */}
+      <div className="px-4 py-3 border-b border-gray-800">
+        <MemoryWidget
+          items={memoryItems}
+          onAdd={handleAddMemory}
+          onEdit={handleEditMemory}
+          onDelete={handleDeleteMemory}
+        />
+      </div>
+
       {/* Files Heat Map */}
-      <div className="max-h-96 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-2 space-y-1">
           <AnimatePresence mode="popLayout">
             {contextData.files.map((file, index) => (
