@@ -19,8 +19,9 @@ export const GovernanceHUD: React.FC<GovernanceHUDProps> = ({ className }) => {
       try {
         const res = await fetch('/api/governance/state');
         if (!res.ok) throw new Error('Failed to fetch governance state');
-        const data = await res.json();
-        setState(data);
+        const response = await res.json();
+        // API wraps response in { success, data, timestamp }
+        setState(response.data);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error occurred');
