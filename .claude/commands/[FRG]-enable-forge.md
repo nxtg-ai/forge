@@ -49,7 +49,7 @@ Now invoke the Forge Orchestrator agent to display the canonical menu:
 
 ### Load Orchestrator Agent
 
-Load and invoke: `.claude/agents/agent-forge-orchestrator.md`
+Load and invoke: `.claude/agents/[AFRG]-orchestrator.md`
 
 The orchestrator will:
 
@@ -143,8 +143,8 @@ After activation, user should see:
 
 If menu doesn't display:
 
-1. Verify orchestrator agent exists: `ls .claude/agents/agent-forge-orchestrator.md`
-2. Check agent file is valid markdown: `head -20 .claude/agents/agent-forge-orchestrator.md`
+1. Verify orchestrator agent exists: `ls ".claude/agents/[AFRG]-orchestrator.md"`
+2. Check agent file is valid markdown: `head -20 ".claude/agents/[AFRG]-orchestrator.md"`
 3. Verify state file exists: `ls .claude/forge/state.json`
 4. Re-initialize: `/init --upgrade`
 
