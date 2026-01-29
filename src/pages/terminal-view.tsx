@@ -101,6 +101,7 @@ const TerminalView: React.FC = () => {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -300, opacity: 0 }}
             className="w-80 border-r border-gray-800 bg-gray-950 flex-shrink-0"
+            data-testid="context-window-hud"
           >
             <div className="h-full overflow-hidden p-4">
               <ContextWindowHUD className="h-full" />

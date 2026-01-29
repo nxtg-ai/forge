@@ -163,7 +163,6 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       className={`bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-xl shadow-2xl flex flex-col ${className}`}
-      data-testid="context-window-hud"
     >
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-800">
