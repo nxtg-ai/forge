@@ -11,7 +11,8 @@ import {
   CommandCenter,
   VisionDisplay,
   YoloMode,
-  ProjectSwitcher
+  ProjectSwitcher,
+  ProjectsManagement
 } from './components';
 import { MCPSelectionView } from './components/onboarding/MCPSelectionView';
 import TerminalView from './pages/terminal-view';
@@ -85,6 +86,7 @@ function IntegratedApp() {
   const [runspaces, setRunspaces] = useState<Runspace[]>([]);
   const [activeRunspace, setActiveRunspace] = useState<Runspace | null>(null);
   const [loadingRunspaces, setLoadingRunspaces] = useState(false);
+  const [showProjectsManagement, setShowProjectsManagement] = useState(false);
 
   // Handle vision capture
   const handleVisionCapture = useCallback(async (visionData: any) => {
@@ -235,8 +237,56 @@ function IntegratedApp() {
 
   // Handle manage projects
   const handleManageProjects = useCallback(() => {
-    // TODO: Navigate to projects management view
-    console.log('Manage projects not yet implemented');
+    setShowProjectsManagement(true);
+  }, []);
+
+  // Runspace management handlers
+  const handleRunspaceStart = useCallback(async (runspaceId: string) => {
+    try {
+      await apiClient.post(`/api/runspaces/${runspaceId}/start`, {});
+      await loadRunspaces();
+    } catch (error) {
+      console.error('Failed to start runspace:', error);
+    }
+  }, []);
+
+  const handleRunspaceStop = useCallback(async (runspaceId: string) => {
+    try {
+      await apiClient.post(`/api/runspaces/${runspaceId}/stop`, {});
+      await loadRunspaces();
+    } catch (error) {
+      console.error('Failed to stop runspace:', error);
+    }
+  }, []);
+
+  const handleRunspaceDelete = useCallback(async (runspaceId: string) => {
+    try {
+      await apiClient.delete(`/api/runspaces/${runspaceId}`, {});
+      await loadRunspaces();
+    } catch (error) {
+      console.error('Failed to delete runspace:', error);
+      throw error;
+    }
+  }, []);
+
+  const loadRunspaces = useCallback(async () => {
+    try {
+      setLoadingRunspaces(true);
+      const response = await apiClient.get('/api/runspaces');
+      if (response.success && response.data) {
+        setRunspaces(response.data.runspaces || []);
+        if (response.data.activeRunspaceId) {
+          const active = (response.data.runspaces || []).find(
+            (r: Runspace) => r.id === response.data.activeRunspaceId
+          );
+          setActiveRunspace(active || null);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load runspaces:', error);
+    } finally {
+      setLoadingRunspaces(false);
+    }
   }, []);
 
   // Handle engagement mode changes
@@ -601,6 +651,19 @@ function IntegratedApp() {
           </div>
         </div>
       )}
+
+      {/* Projects Management Modal */}
+      <ProjectsManagement
+        isOpen={showProjectsManagement}
+        onClose={() => setShowProjectsManagement(false)}
+        runspaces={runspaces}
+        activeRunspaceId={activeRunspace?.id || null}
+        onRefresh={loadRunspaces}
+        onSwitch={handleRunspaceSwitch}
+        onStart={handleRunspaceStart}
+        onStop={handleRunspaceStop}
+        onDelete={handleRunspaceDelete}
+      />
     </div>
   );
 }

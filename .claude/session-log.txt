@@ -9,7 +9,7 @@ Focus: UX/DX Improvements
 - Found 17 TODO comments across 8 files
 - Identified priority #1: Diff Apply/Reject missing implementation
 
-### Hour 2 (20:00-21:00) 🔄
+### Hour 2 (20:00-21:00) ✅
 **UX Improvement #1: Real Diff Operations** ✅
 - Created `src/api/diff-service.ts` - UI abstraction for diff operations
 - Added backend API endpoints: `/api/diffs/apply`, `/api/diffs/reject`, `/api/diffs/pending`
@@ -17,6 +17,13 @@ Focus: UX/DX Improvements
 - Added WebSocket broadcasts for real-time updates
 - Committed: 3a43aec "feat: Implement real Diff Apply/Reject functionality"
 
-**Status:** Looking for more quick wins...
+**UX Improvement #2: Toast Notifications** ✅
+- Added ToastProvider to app root in `main.tsx`
+- Replaced console.logs with rich toast notifications
+- Success, error, and info toasts for diff operations
+- Auto-dismiss with expandable error details
+- Committed: df89ed2 "feat: Add toast notifications for diff operations"
+
+**Status:** 2 UX improvements completed in ~1 hour. Continuing scan...
 
 ---

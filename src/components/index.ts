@@ -6,6 +6,7 @@ export { CommandCenter } from './CommandCenter';
 export { VisionDisplay } from './VisionDisplay';
 export { YoloMode } from './YoloMode';
 export { ProjectSwitcher } from './ProjectSwitcher';
+export { ProjectsManagement } from './ProjectsManagement';
 
 // Type exports
 export type {
