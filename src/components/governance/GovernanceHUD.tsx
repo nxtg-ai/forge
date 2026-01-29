@@ -18,12 +18,27 @@ export const GovernanceHUD: React.FC<GovernanceHUDProps> = ({ className }) => {
     const fetchState = async () => {
       try {
         const res = await fetch('/api/governance/state');
-        if (!res.ok) throw new Error('Failed to fetch governance state');
-        const response = await res.json();
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('API Error:', res.status, errorText);
+          throw new Error(`API returned ${res.status}: ${errorText}`);
+        }
+
+        const text = await res.text();
+        console.log('API Response (raw):', text.substring(0, 100));
+
+        const response = JSON.parse(text);
+        console.log('API Response (parsed):', response);
+
         // API wraps response in { success, data, timestamp }
-        setState(response.data);
-        setError(null);
+        if (response.data) {
+          setState(response.data);
+          setError(null);
+        } else {
+          throw new Error('Invalid response structure - missing data property');
+        }
       } catch (err) {
+        console.error('Governance fetch error:', err);
         setError(err instanceof Error ? err.message : 'Unknown error occurred');
       } finally {
         setIsLoading(false);
