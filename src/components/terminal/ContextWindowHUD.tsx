@@ -213,7 +213,7 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
       )}
 
       {/* Memory Section */}
-      <div className="px-4 py-3 border-b border-gray-800">
+      <div className="px-4 py-3 border-b border-gray-800 max-h-64 overflow-y-auto flex-shrink-0">
         <MemoryWidget
           items={memoryItems}
           onAdd={handleAddMemory}
@@ -223,7 +223,7 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
       </div>
 
       {/* Files Heat Map */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         <div className="p-2 space-y-1">
           <AnimatePresence mode="popLayout">
             {contextData.files.map((file, index) => (
