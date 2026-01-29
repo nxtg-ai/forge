@@ -46,21 +46,44 @@ export const ContextWindowHUD: React.FC<ContextWindowHUDProps> = ({
 
   const [memoryItems, setMemoryItems] = useState<MemoryItem[]>([]);
 
-  // Load memory from localStorage on mount
+  // Load memory from localStorage on mount, or fetch seed data
   useEffect(() => {
-    const stored = localStorage.getItem('forge-memory');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setMemoryItems(parsed.map((item: any) => ({
-          ...item,
-          created: new Date(item.created),
-          updated: new Date(item.updated)
-        })));
-      } catch (e) {
-        console.error('Failed to load memory:', e);
+    const loadMemory = async () => {
+      const stored = localStorage.getItem('forge-memory');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setMemoryItems(parsed.map((item: any) => ({
+            ...item,
+            created: new Date(item.created),
+            updated: new Date(item.updated)
+          })));
+        } catch (e) {
+          console.error('Failed to load memory:', e);
+        }
+      } else {
+        // No memory stored, fetch seed data
+        try {
+          const response = await fetch('http://localhost:5051/api/memory/seed');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data) {
+              const items = data.data.map((item: any) => ({
+                ...item,
+                created: new Date(item.created),
+                updated: new Date(item.updated)
+              }));
+              setMemoryItems(items);
+              localStorage.setItem('forge-memory', JSON.stringify(data.data));
+              console.log(`✅ Loaded ${items.length} seed memory items`);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to fetch seed memory:', e);
+        }
       }
-    }
+    };
+    loadMemory();
   }, []);
 
   // Save memory to localStorage whenever it changes
