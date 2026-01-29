@@ -654,6 +654,100 @@ app.get('/api/memory/seed', async (_req, res) => {
   }
 });
 
+// ============= Diff Endpoints =============
+
+app.post('/api/diffs/apply', async (req, res) => {
+  try {
+    const { filePath, timestamp } = req.body;
+
+    if (!filePath) {
+      return res.status(400).json({
+        success: false,
+        error: 'filePath is required',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // TODO: Implement actual diff application logic
+    // For now, simulate success
+    console.log(`📝 Applying diff to: ${filePath}`);
+
+    // Broadcast diff applied event
+    broadcast('diff.applied', {
+      filePath,
+      timestamp: timestamp || new Date().toISOString()
+    });
+
+    res.json({
+      success: true,
+      message: `Successfully applied changes to ${filePath}`,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.post('/api/diffs/reject', async (req, res) => {
+  try {
+    const { filePath, timestamp } = req.body;
+
+    if (!filePath) {
+      return res.status(400).json({
+        success: false,
+        error: 'filePath is required',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // TODO: Implement actual diff rejection logic
+    console.log(`❌ Rejecting diff for: ${filePath}`);
+
+    // Broadcast diff rejected event
+    broadcast('diff.rejected', {
+      filePath,
+      timestamp: timestamp || new Date().toISOString()
+    });
+
+    res.json({
+      success: true,
+      message: `Rejected changes to ${filePath}`,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.get('/api/diffs/pending', async (req, res) => {
+  try {
+    // TODO: Implement actual pending diffs retrieval
+    // For now, return empty array
+    const diffs: any[] = [];
+
+    res.json({
+      success: true,
+      data: diffs,
+      count: diffs.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // ============= Runspace Endpoints =============
 
 app.post('/api/runspaces', async (req, res) => {

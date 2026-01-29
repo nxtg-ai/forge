@@ -7,19 +7,28 @@ import React, { useState } from 'react';
 import { ClaudeTerminal, DiffVisualization, ContextWindowHUD } from '../components/terminal';
 import { motion } from 'framer-motion';
 import { Terminal, X, Layout, Maximize2 } from 'lucide-react';
+import { applyDiff, rejectDiff } from '../api/diff-service';
 
 const TerminalView: React.FC = () => {
   const [showDiffPanel, setShowDiffPanel] = useState(true);
   const [showContextPanel, setShowContextPanel] = useState(true);
 
-  const handleApplyDiff = (filePath: string) => {
-    console.log('Applying diff for:', filePath);
-    // TODO: Send apply command to backend
+  const handleApplyDiff = async (filePath: string) => {
+    const result = await applyDiff(filePath);
+    if (result.success) {
+      console.log('✅', result.message);
+    } else {
+      console.error('❌', result.message);
+    }
   };
 
-  const handleRejectDiff = (filePath: string) => {
-    console.log('Rejecting diff for:', filePath);
-    // TODO: Send reject command to backend
+  const handleRejectDiff = async (filePath: string) => {
+    const result = await rejectDiff(filePath);
+    if (result.success) {
+      console.log('✅', result.message);
+    } else {
+      console.error('❌', result.message);
+    }
   };
 
   const handleDangerousCommand = async (command: string): Promise<boolean> => {
