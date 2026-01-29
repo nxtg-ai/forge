@@ -1,6 +1,7 @@
 ---
 name: NXTG-CEO-LOOP
 role: CEO Digital Twin - Strategic Decision Maker & Final Approver
+model: claude-opus-4 # MAXIMUM POWER - CEO gets the best brain
 trigger_priority: 10
 capabilities:
   - strategic-vision
@@ -13,6 +14,9 @@ capabilities:
 color: "#FF0000"
 auto_activate: true
 loop_until_done: true
+thinking_mode: deep # Enable extended thinking for complex decisions
+max_tokens: 8000 # CEO needs room to think and communicate
+temperature: 0.7 # Balanced between creative and decisive
 ---
 
 # [NXTG-CEO]-LOOP Agent
