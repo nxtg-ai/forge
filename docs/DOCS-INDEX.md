@@ -1,12 +1,60 @@
-# Documentation Index - Multi-Project Runspaces v1.0
+# Documentation Index
+
+**Last Updated**: 2026-01-29
+**Release**: Multi-Project v1.0, Testing v1.0
+**Locations**: `docs/features/`, `docs/testing/`
+
+---
+
+## 📚 Documentation Categories
+
+- [Multi-Project Runspaces](#multi-project-runspaces-v10) - Multi-project management
+- [Testing & QA](#testing--qa) - Data-testid, E2E, UAT testing
+
+---
+
+## Testing & QA
+
+### Quick Start
+**Location**: `docs/testing/README.md`
+
+**Purpose**: All testing documentation and tools
+
+### Core Documents
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **[data-testid-process.md](testing/data-testid-process.md)** | **START HERE** - Complete implementation guide | Developers, QA |
+| [data-testid-uat-report.md](testing/data-testid-uat-report.md) | Complete coverage report (13 components, 141+ testids) | QA, Product |
+| [data-testid-implementation-report.md](testing/data-testid-implementation-report.md) | Initial implementation (4 components) | Historical |
+
+### Tools & Scripts
+
+| Tool | Location | Purpose |
+|------|----------|---------|
+| **Requirements** | `.forge/Design-System/UI/data-testid-prompt.md` | What to tag, naming rules |
+| **Add Script** | `scripts/testing/add-testids.ts` | Automated batch updates |
+| **Check Script** | `scripts/testing/check-testids.sh` | Verification & duplicate check |
+
+### Current Status
+
+```
+✅ 13 components fully tagged
+✅ 141+ unique testids
+✅ 0 duplicates
+✅ 100% naming standard compliance
+✅ Ready for UAT & E2E testing
+```
+
+---
+
+## Multi-Project Runspaces v1.0
 
 **Last Updated**: 2026-01-27
 **Release**: Phase 1 Complete
 **Location**: `docs/features/multi-project/`
 
----
-
-## 📚 Core Documentation
+### Core Documentation
 
 ### 1. **Multi-Project README** 📖
 **Location**: `docs/features/multi-project/README.md`
