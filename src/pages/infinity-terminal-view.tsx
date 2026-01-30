@@ -19,6 +19,7 @@ import {
   Keyboard,
   Settings,
   Infinity,
+  Brain,
 } from 'lucide-react';
 
 import {
@@ -28,6 +29,7 @@ import {
   useResponsiveLayout,
 } from '../components/infinity-terminal';
 import { GovernanceHUD } from '../components/governance';
+import { ContextWindowHUD } from '../components/terminal';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useToast } from '../components/feedback/ToastSystem';
 
@@ -49,6 +51,7 @@ const InfinityTerminalView: React.FC = () => {
 
   const [showHelpOverlay, setShowHelpOverlay] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [showContextPanel, setShowContextPanel] = useState(true);
   const [lastSession, setLastSession] = useState<ReturnType<typeof getLastSession>>(null);
   const [sessionRestored, setSessionRestored] = useState(false);
 
@@ -109,6 +112,20 @@ const InfinityTerminalView: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Memory & Context Toggle */}
+              <button
+                onClick={() => setShowContextPanel(!showContextPanel)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  showContextPanel
+                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+                title="Toggle Memory & Context Panel"
+              >
+                <Brain className="w-4 h-4 inline mr-1.5" />
+                Memory {showContextPanel ? 'ON' : 'OFF'}
+              </button>
+
               {/* Governance Toggle */}
               <button
                 onClick={toggleHUD}
@@ -142,6 +159,23 @@ const InfinityTerminalView: React.FC = () => {
 
       {/* Main Layout */}
       <div className="flex h-[calc(100vh-73px)]">
+        {/* Left Sidebar - Memory & Context Panel */}
+        {showContextPanel && !layout.isMobile && (
+          <AnimatePresence>
+            <motion.aside
+              initial={{ x: -320, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -320, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="w-80 flex-shrink-0 border-r border-gray-800 bg-gray-950"
+            >
+              <div className="h-full overflow-hidden p-4">
+                <ContextWindowHUD className="h-full" />
+              </div>
+            </motion.aside>
+          </AnimatePresence>
+        )}
+
         {/* Terminal */}
         <main className="flex-1 min-w-0 bg-black">
           <InfinityTerminal
@@ -176,6 +210,15 @@ const InfinityTerminalView: React.FC = () => {
             <ErrorBoundary fallbackMessage="Governance HUD encountered an error.">
               <GovernanceHUD />
             </ErrorBoundary>
+          </MobileHUDSheet>
+        )}
+
+        {/* Mobile Context Panel Bottom Sheet */}
+        {showContextPanel && layout.isMobile && (
+          <MobileHUDSheet onClose={() => setShowContextPanel(false)}>
+            <div className="p-4">
+              <ContextWindowHUD className="h-full" />
+            </div>
           </MobileHUDSheet>
         )}
       </div>
