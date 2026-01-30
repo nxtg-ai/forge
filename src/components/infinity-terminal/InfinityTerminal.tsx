@@ -13,7 +13,6 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
-import { AttachAddon } from '@xterm/addon-attach';
 import '@xterm/xterm/css/xterm.css';
 import {
   Terminal as TerminalIcon,
@@ -52,8 +51,8 @@ export const InfinityTerminal: React.FC<InfinityTerminalProps> = ({
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
-  const attachAddonRef = useRef<AttachAddon | null>(null);
   const initializedRef = useRef(false);
+  const wsListenerAttached = useRef(false);
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSessionHistory, setShowSessionHistory] = useState(false);
@@ -150,29 +149,71 @@ export const InfinityTerminal: React.FC<InfinityTerminalProps> = ({
     connect();
   }, [connect]);
 
-  // Attach WebSocket to terminal when connected
+  // Connect terminal to WebSocket with JSON protocol
   useEffect(() => {
     const ws = getWebSocket();
     const term = xtermRef.current;
 
     if (!ws || !term || ws.readyState !== WebSocket.OPEN) return;
+    if (wsListenerAttached.current) return;
 
-    // Remove existing attach addon
-    if (attachAddonRef.current) {
-      attachAddonRef.current.dispose();
-    }
+    wsListenerAttached.current = true;
 
-    // Create new attach addon
-    const attachAddon = new AttachAddon(ws);
-    term.loadAddon(attachAddon);
-    attachAddonRef.current = attachAddon;
+    // Handle incoming messages from PTY bridge
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const message = JSON.parse(event.data);
+        switch (message.type) {
+          case 'output':
+            term.write(message.data);
+            break;
+          case 'cost':
+            // Could display cost info if needed
+            break;
+        }
+      } catch (err) {
+        // If not JSON, write raw data (fallback)
+        if (typeof event.data === 'string') {
+          term.write(event.data);
+        }
+      }
+    };
+
+    // Send terminal input as JSON
+    const handleData = term.onData((data) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'input', data }));
+      }
+    });
+
+    // Send resize events as JSON
+    const handleResize = term.onResize(({ cols, rows }) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'resize', cols, rows }));
+      }
+    });
+
+    ws.addEventListener('message', handleMessage);
 
     term.writeln('\x1b[32m✓ Connected to persistent session\x1b[0m');
     term.writeln(`\x1b[90mSession: ${sessionState.sessionName}\x1b[0m`);
     term.writeln('');
+    term.write('$ ');
+
+    // Send initial resize
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+    }
 
     // Fit after connection
     fitAddonRef.current?.fit();
+
+    return () => {
+      ws.removeEventListener('message', handleMessage);
+      handleData.dispose();
+      handleResize.dispose();
+      wsListenerAttached.current = false;
+    };
   }, [sessionState.connected, getWebSocket, sessionState.sessionName]);
 
   // Handle reconnect
