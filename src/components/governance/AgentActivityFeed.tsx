@@ -41,20 +41,40 @@ export const AgentActivityFeed: React.FC<AgentActivityFeedProps> = ({
   const [filter, setFilter] = useState<string>('all');
   const [isExpanded, setIsExpanded] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionFailed, setConnectionFailed] = useState(false);
 
   // Fetch initial activities and set up WebSocket
   useEffect(() => {
     let ws: WebSocket | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let isCancelled = false;
 
     const connectWebSocket = () => {
+      if (isCancelled) return;
+
+      // Stop trying after max attempts
+      if (reconnectAttempts >= maxReconnectAttempts) {
+        setConnectionFailed(true);
+        return;
+      }
+
       try {
         ws = new WebSocket(`ws://${window.location.hostname}:5051/ws`);
 
         ws.onopen = () => {
+          if (isCancelled) {
+            ws?.close();
+            return;
+          }
+          reconnectAttempts = 0;
           setIsConnected(true);
+          setConnectionFailed(false);
         };
 
         ws.onmessage = (event) => {
+          if (isCancelled) return;
           try {
             const message = JSON.parse(event.data);
             if (message.type === 'worker.event') {
@@ -69,22 +89,35 @@ export const AgentActivityFeed: React.FC<AgentActivityFeedProps> = ({
         };
 
         ws.onclose = () => {
+          if (isCancelled) return;
           setIsConnected(false);
-          // Reconnect after delay
-          setTimeout(connectWebSocket, 3000);
+
+          // Reconnect with backoff, but only up to max attempts
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            const delay = 2000 * Math.pow(2, reconnectAttempts - 1);
+            reconnectTimeout = setTimeout(connectWebSocket, delay);
+          } else {
+            setConnectionFailed(true);
+          }
         };
 
         ws.onerror = () => {
-          setIsConnected(false);
+          // Let onclose handle the state change
         };
       } catch (err) {
-        console.error('WebSocket connection failed:', err);
+        // WebSocket constructor failed
+        setConnectionFailed(true);
       }
     };
 
     connectWebSocket();
 
     return () => {
+      isCancelled = true;
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
       if (ws) {
         ws.close();
       }
@@ -179,7 +212,10 @@ export const AgentActivityFeed: React.FC<AgentActivityFeedProps> = ({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+          <div className={`w-2 h-2 rounded-full ${
+            connectionFailed ? 'bg-gray-500' :
+            isConnected ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'
+          }`} />
           <ChevronDown
             className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? '' : '-rotate-90'}`}
           />
@@ -214,9 +250,16 @@ export const AgentActivityFeed: React.FC<AgentActivityFeedProps> = ({
 
             {/* Activity List */}
             <div className="max-h-48 overflow-y-auto">
-              {filteredActivities.length === 0 ? (
+              {connectionFailed ? (
                 <div className="px-3 py-4 text-center text-gray-500 text-xs">
-                  No activity yet. Worker pool events will appear here.
+                  <p>Worker pool not running.</p>
+                  <p className="mt-1 text-gray-600">Initialize via Worker Pool panel above.</p>
+                </div>
+              ) : filteredActivities.length === 0 ? (
+                <div className="px-3 py-4 text-center text-gray-500 text-xs">
+                  {isConnected
+                    ? 'No activity yet. Worker pool events will appear here.'
+                    : 'Connecting to worker pool...'}
                 </div>
               ) : (
                 <div className="divide-y divide-gray-800/50">

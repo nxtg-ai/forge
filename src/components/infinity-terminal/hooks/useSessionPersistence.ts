@@ -32,7 +32,7 @@ const DEFAULT_CONFIG: SessionConfig = {
   ttydHost: '127.0.0.1',
   sessionPrefix: 'forge',
   autoReconnect: true,
-  maxReconnectAttempts: 5,
+  maxReconnectAttempts: 3,
   reconnectDelay: 2000,
 };
 
@@ -83,6 +83,8 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const isManualDisconnectRef = useRef(false);
 
   // Generate session name from project
   const generateSessionName = useCallback(() => {
@@ -157,13 +159,22 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
       return;
     }
 
+    // Check if we've exceeded max reconnect attempts
+    if (reconnectAttemptsRef.current >= config.maxReconnectAttempts) {
+      console.log('[InfinityTerminal] Max reconnect attempts reached, stopping');
+      const errorMsg = 'Terminal service unavailable. Run ./scripts/start-infinity-terminal.sh to start.';
+      setState(prev => ({ ...prev, error: errorMsg, connecting: false }));
+      return;
+    }
+
+    isManualDisconnectRef.current = false;
     setState(prev => ({ ...prev, connecting: true, error: null }));
 
     const sessionName = generateSessionName();
     const sessionId = generateSessionId();
     const url = getTtydUrl();
 
-    console.log(`[InfinityTerminal] Connecting to ${url}`);
+    console.log(`[InfinityTerminal] Connecting to ${url} (attempt ${reconnectAttemptsRef.current + 1}/${config.maxReconnectAttempts})`);
 
     try {
       const ws = new WebSocket(url);
@@ -172,6 +183,7 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
 
       ws.onopen = () => {
         console.log('[InfinityTerminal] Connected');
+        reconnectAttemptsRef.current = 0;
 
         const session = saveSession({
           sessionId,
@@ -201,23 +213,30 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
         setState(prev => ({ ...prev, connected: false, connecting: false }));
         onConnectionChange?.(false);
 
-        // Auto-reconnect if enabled
-        if (config.autoReconnect && state.reconnectAttempts < config.maxReconnectAttempts) {
-          const delay = config.reconnectDelay * Math.pow(2, state.reconnectAttempts);
-          console.log(`[InfinityTerminal] Reconnecting in ${delay}ms...`);
+        // Don't auto-reconnect if manually disconnected or max attempts reached
+        if (isManualDisconnectRef.current) {
+          return;
+        }
+
+        // Auto-reconnect if enabled and under max attempts
+        if (config.autoReconnect && reconnectAttemptsRef.current < config.maxReconnectAttempts) {
+          const delay = config.reconnectDelay * Math.pow(2, reconnectAttemptsRef.current);
+          console.log(`[InfinityTerminal] Reconnecting in ${delay}ms... (attempt ${reconnectAttemptsRef.current + 1}/${config.maxReconnectAttempts})`);
 
           reconnectTimeoutRef.current = setTimeout(() => {
-            setState(prev => ({ ...prev, reconnectAttempts: prev.reconnectAttempts + 1 }));
+            reconnectAttemptsRef.current += 1;
+            setState(prev => ({ ...prev, reconnectAttempts: reconnectAttemptsRef.current }));
             connect();
           }, delay);
+        } else if (reconnectAttemptsRef.current >= config.maxReconnectAttempts) {
+          const errorMsg = 'Terminal service unavailable. Run ./scripts/start-infinity-terminal.sh to start.';
+          setState(prev => ({ ...prev, error: errorMsg }));
         }
       };
 
       ws.onerror = (error) => {
         console.error('[InfinityTerminal] WebSocket error:', error);
-        const errorMsg = 'Connection failed. Is ttyd running?';
-        setState(prev => ({ ...prev, error: errorMsg, connecting: false }));
-        onError?.(errorMsg);
+        // Don't set error here - let onclose handle the state
       };
 
       wsRef.current = ws;
@@ -235,13 +254,15 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
     config.autoReconnect,
     config.maxReconnectAttempts,
     config.reconnectDelay,
-    state.reconnectAttempts,
     onConnectionChange,
     onError,
   ]);
 
   // Disconnect
   const disconnect = useCallback(() => {
+    isManualDisconnectRef.current = true;
+    reconnectAttemptsRef.current = 0;
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -258,6 +279,13 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
       connecting: false,
       reconnectAttempts: 0,
     }));
+  }, []);
+
+  // Reset reconnect counter (allows manual retry)
+  const resetReconnect = useCallback(() => {
+    reconnectAttemptsRef.current = 0;
+    isManualDisconnectRef.current = false;
+    setState(prev => ({ ...prev, reconnectAttempts: 0, error: null }));
   }, []);
 
   // Restore session
@@ -312,6 +340,7 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
     config,
     connect,
     disconnect,
+    resetReconnect,
     restoreSession,
     removeSession,
     getAvailableSessions,

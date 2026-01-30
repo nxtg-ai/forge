@@ -62,6 +62,7 @@ export const InfinityTerminal: React.FC<InfinityTerminalProps> = ({
     state: sessionState,
     connect,
     disconnect,
+    resetReconnect,
     restoreSession,
     getAvailableSessions,
     getWebSocket,
@@ -279,8 +280,17 @@ export const InfinityTerminal: React.FC<InfinityTerminalProps> = ({
 
       {/* Error Banner */}
       {sessionState.error && (
-        <div className="px-4 py-2 bg-red-500/10 border-t border-red-500/30 text-red-400 text-sm">
-          {sessionState.error}
+        <div className="px-4 py-2 bg-red-500/10 border-t border-red-500/30 text-red-400 text-sm flex items-center justify-between">
+          <span>{sessionState.error}</span>
+          <button
+            onClick={() => {
+              resetReconnect();
+              connect();
+            }}
+            className="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 rounded text-xs transition-colors"
+          >
+            Retry
+          </button>
         </div>
       )}
     </div>
