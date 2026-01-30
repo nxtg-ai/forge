@@ -1,0 +1,39 @@
+/**
+ * Infinity Terminal - Persistent Terminal Sessions
+ *
+ * Main exports for the Infinity Terminal component system.
+ * Provides persistent terminal sessions via Zellij + ttyd with
+ * multi-device access and session restoration.
+ */
+
+// Main component
+export { InfinityTerminal, default as InfinityTerminalDefault } from './InfinityTerminal';
+
+// Layout components
+export { InfinityTerminalLayout } from './layout';
+
+// Session components
+export {
+  SessionStatusBar,
+  SessionRestoreModal,
+  SessionPersistenceIndicator,
+} from './session';
+
+// Hooks
+export {
+  useSessionPersistence,
+  useResponsiveLayout,
+} from './hooks';
+
+// Types
+export type {
+  SessionState,
+  SessionConfig,
+  UseSessionPersistenceReturn,
+} from './hooks/useSessionPersistence';
+
+export type {
+  Breakpoint,
+  LayoutConfig,
+  UseResponsiveLayoutReturn,
+} from './hooks/useResponsiveLayout';
