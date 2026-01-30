@@ -9,6 +9,10 @@
 // Main component
 export { InfinityTerminal, default as InfinityTerminalDefault } from './InfinityTerminal';
 
+// Mobile components
+export { MobileTerminalView } from './MobileTerminalView';
+export { DevicePairing } from './DevicePairing';
+
 // Pane management
 export { TerminalPaneSwitcher } from './TerminalPaneSwitcher';
 export type { TerminalPane } from './TerminalPaneSwitcher';
@@ -27,6 +31,7 @@ export {
 export {
   useSessionPersistence,
   useResponsiveLayout,
+  useTouchGestures,
 } from './hooks';
 
 // Types

@@ -7,3 +7,6 @@ export type { SessionState, SessionConfig, UseSessionPersistenceReturn } from '.
 
 export { useResponsiveLayout } from './useResponsiveLayout';
 export type { Breakpoint, LayoutConfig, UseResponsiveLayoutReturn } from './useResponsiveLayout';
+
+export { useTouchGestures } from './useTouchGestures';
+export type { UseTouchGesturesReturn } from './useTouchGestures';
