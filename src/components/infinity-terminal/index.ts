@@ -9,6 +9,10 @@
 // Main component
 export { InfinityTerminal, default as InfinityTerminalDefault } from './InfinityTerminal';
 
+// Pane management
+export { TerminalPaneSwitcher } from './TerminalPaneSwitcher';
+export type { TerminalPane } from './TerminalPaneSwitcher';
+
 // Layout components
 export { InfinityTerminalLayout } from './layout';
 
