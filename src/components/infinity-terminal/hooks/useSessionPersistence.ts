@@ -19,8 +19,12 @@ export interface SessionState {
 }
 
 export interface SessionConfig {
-  ttydPort: number;
-  ttydHost: string;
+  /** WebSocket port for terminal connection */
+  wsPort: number;
+  /** WebSocket host */
+  wsHost: string;
+  /** WebSocket path (e.g., '/terminal' for PTY bridge) */
+  wsPath: string;
   sessionPrefix: string;
   autoReconnect: boolean;
   maxReconnectAttempts: number;
@@ -28,8 +32,10 @@ export interface SessionConfig {
 }
 
 const DEFAULT_CONFIG: SessionConfig = {
-  ttydPort: 7681,
-  ttydHost: '127.0.0.1',
+  // Use the existing PTY bridge running on the API server
+  wsPort: 5051,
+  wsHost: 'localhost',
+  wsPath: '/terminal',
   sessionPrefix: 'forge',
   autoReconnect: true,
   maxReconnectAttempts: 3,
@@ -145,11 +151,14 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   }, [getStoredSessions]);
 
-  // Get ttyd WebSocket URL
-  const getTtydUrl = useCallback(() => {
+  // Get terminal WebSocket URL
+  const getWsUrl = useCallback(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${protocol}//${config.ttydHost}:${config.ttydPort}/ws`;
-  }, [config.ttydHost, config.ttydPort]);
+    return `${protocol}//${config.wsHost}:${config.wsPort}${config.wsPath}`;
+  }, [config.wsHost, config.wsPort, config.wsPath]);
+
+  // Alias for backward compatibility
+  const getTtydUrl = getWsUrl;
 
   // Connect to ttyd
   const connect = useCallback(() => {
@@ -162,7 +171,7 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
     // Check if we've exceeded max reconnect attempts
     if (reconnectAttemptsRef.current >= config.maxReconnectAttempts) {
       console.log('[InfinityTerminal] Max reconnect attempts reached, stopping');
-      const errorMsg = 'Terminal service unavailable. Run ./scripts/start-infinity-terminal.sh to start.';
+      const errorMsg = 'Terminal service unavailable. Is the API server running? (npm run dev)';
       setState(prev => ({ ...prev, error: errorMsg, connecting: false }));
       return;
     }
@@ -172,7 +181,7 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
 
     const sessionName = generateSessionName();
     const sessionId = generateSessionId();
-    const url = getTtydUrl();
+    const url = getWsUrl();
 
     console.log(`[InfinityTerminal] Connecting to ${url} (attempt ${reconnectAttemptsRef.current + 1}/${config.maxReconnectAttempts})`);
 
@@ -229,7 +238,7 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
             connect();
           }, delay);
         } else if (reconnectAttemptsRef.current >= config.maxReconnectAttempts) {
-          const errorMsg = 'Terminal service unavailable. Run ./scripts/start-infinity-terminal.sh to start.';
+          const errorMsg = 'Terminal service unavailable. Is the API server running? (npm run dev)';
           setState(prev => ({ ...prev, error: errorMsg }));
         }
       };
@@ -248,7 +257,7 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
   }, [
     generateSessionName,
     generateSessionId,
-    getTtydUrl,
+    getWsUrl,
     saveSession,
     layout,
     config.autoReconnect,
@@ -346,7 +355,8 @@ export function useSessionPersistence(options: UseSessionPersistenceOptions = {}
     getAvailableSessions,
     updateActivity,
     getWebSocket,
-    getTtydUrl,
+    getWsUrl,
+    getTtydUrl, // Alias for backward compatibility
   };
 }
 
