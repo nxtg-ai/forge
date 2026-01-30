@@ -20,7 +20,7 @@ export class GovernanceStateManager {
 
   constructor(projectRoot: string) {
     this.projectRoot = projectRoot;
-    this.statePath = path.join(projectRoot, '.claude/governance/state.json');
+    this.statePath = path.join(projectRoot, '.claude/governance.json');
     this.configPath = path.join(projectRoot, '.claude/governance/config.json');
     this.backupDir = path.join(projectRoot, '.claude/governance/backups');
   }

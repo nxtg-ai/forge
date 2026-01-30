@@ -667,7 +667,7 @@ app.get('/api/memory/seed', async (_req, res) => {
 app.get('/api/governance/state', async (req, res) => {
   try {
     const projectRoot = process.cwd();
-    const governancePath = path.join(projectRoot, '.claude/governance/state.json');
+    const governancePath = path.join(projectRoot, '.claude/governance.json');
 
     try {
       const data = await fs.readFile(governancePath, 'utf-8');

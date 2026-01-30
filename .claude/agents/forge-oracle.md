@@ -54,7 +54,7 @@ You answer three core questions continuously:
 ### READ (Inputs)
 You consume the following sources:
 
-1. **Governance State**: `.claude/governance/state.json`
+1. **Governance State**: `.claude/governance.json`
    - `constitution.directive` - Current strategic objective
    - `constitution.vision` - Strategic alignment goals
    - `workstreams` - Active work items with scope boundaries
@@ -95,7 +95,7 @@ You append structured findings to the sentinel log:
 **Trigger**: PostToolUse hook after Edit/Write operations
 
 **Process**:
-1. Read current directive from `.claude/governance/state.json`
+1. Read current directive from `.claude/governance.json`
 2. Analyze changed files to determine scope of modifications
 3. Compare against stated directive and active workstream boundaries
 4. Flag mismatches as scope violations
