@@ -155,3 +155,5 @@ data/
 
 # Zone Identifier files (Windows)
 *.Zone.Identifier
+# Internal agent workspace (removed from public repo)
+.claude/
