@@ -13,17 +13,17 @@ A unified, flexible header component that replaces the dual-header architecture 
 ### Files Created
 
 1. **Component**
-   - `/home/axw/projects/NXTG-Forge/v3/src/components/layout/AppHeader.tsx` (24,402 bytes)
+   - `~/projects/NXTG-Forge/v3/src/components/layout/AppHeader.tsx` (24,402 bytes)
 
 2. **Documentation**
-   - `/home/axw/projects/NXTG-Forge/v3/docs/components/AppHeader.md` (comprehensive guide)
-   - `/home/axw/projects/NXTG-Forge/v3/src/components/layout/AppHeader.QUICKREF.md` (quick reference)
+   - `~/projects/NXTG-Forge/v3/docs/components/AppHeader.md` (comprehensive guide)
+   - `~/projects/NXTG-Forge/v3/src/components/layout/AppHeader.QUICKREF.md` (quick reference)
 
 3. **Examples**
-   - `/home/axw/projects/NXTG-Forge/v3/src/examples/AppHeaderExample.tsx` (5 usage patterns)
+   - `~/projects/NXTG-Forge/v3/src/examples/AppHeaderExample.tsx` (5 usage patterns)
 
 4. **Exports**
-   - Updated `/home/axw/projects/NXTG-Forge/v3/src/components/layout/index.ts`
+   - Updated `~/projects/NXTG-Forge/v3/src/components/layout/index.ts`
 
 ---
 
@@ -373,19 +373,19 @@ Pages no longer need headers. Remove page-specific headers and use `actions` pro
 ## Files Reference
 
 ### Source Code
-- `/home/axw/projects/NXTG-Forge/v3/src/components/layout/AppHeader.tsx`
-- `/home/axw/projects/NXTG-Forge/v3/src/components/layout/index.ts`
+- `~/projects/NXTG-Forge/v3/src/components/layout/AppHeader.tsx`
+- `~/projects/NXTG-Forge/v3/src/components/layout/index.ts`
 
 ### Documentation
-- `/home/axw/projects/NXTG-Forge/v3/docs/components/AppHeader.md`
-- `/home/axw/projects/NXTG-Forge/v3/src/components/layout/AppHeader.QUICKREF.md`
+- `~/projects/NXTG-Forge/v3/docs/components/AppHeader.md`
+- `~/projects/NXTG-Forge/v3/src/components/layout/AppHeader.QUICKREF.md`
 
 ### Examples
-- `/home/axw/projects/NXTG-Forge/v3/src/examples/AppHeaderExample.tsx`
+- `~/projects/NXTG-Forge/v3/src/examples/AppHeaderExample.tsx`
 
 ### Related
-- `/home/axw/projects/NXTG-Forge/v3/src/components/ProjectSwitcher.tsx`
-- `/home/axw/projects/NXTG-Forge/v3/src/contexts/EngagementContext.tsx`
+- `~/projects/NXTG-Forge/v3/src/components/ProjectSwitcher.tsx`
+- `~/projects/NXTG-Forge/v3/src/contexts/EngagementContext.tsx`
 
 ---
 
