@@ -250,15 +250,15 @@ Fallback polling ensures compatibility with older environments.
 ## Related Files
 
 ### Backend
-- `/home/axw/projects/NXTG-Forge/v3/src/server/api-server.ts` - WebSocket server & file watcher
-- `/home/axw/projects/NXTG-Forge/v3/src/services/governance-state-manager.ts` - State management
+- `~/projects/NXTG-Forge/v3/src/server/api-server.ts` - WebSocket server & file watcher
+- `~/projects/NXTG-Forge/v3/src/services/governance-state-manager.ts` - State management
 
 ### Frontend
-- `/home/axw/projects/NXTG-Forge/v3/src/components/governance/GovernanceHUD.tsx` - WebSocket client
-- `/home/axw/projects/NXTG-Forge/v3/src/components/governance/AgentActivityFeed.tsx` - Similar pattern
+- `~/projects/NXTG-Forge/v3/src/components/governance/GovernanceHUD.tsx` - WebSocket client
+- `~/projects/NXTG-Forge/v3/src/components/governance/AgentActivityFeed.tsx` - Similar pattern
 
 ### Testing
-- `/home/axw/projects/NXTG-Forge/v3/test-governance-websocket.sh` - Test script
+- `~/projects/NXTG-Forge/v3/test-governance-websocket.sh` - Test script
 
 ## Troubleshooting
 

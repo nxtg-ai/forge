@@ -28,7 +28,7 @@ Browser (xterm.js) → WebSocket → PTY Bridge (api-server.ts) → Shell
 The UI uses **Vite's proxy** for multi-device access:
 
 ```
-Remote Device → http://192.168.1.206:5050/api/* → Vite Proxy → localhost:5051
+Remote Device → http://192.0.2.10:5050/api/* → Vite Proxy → localhost:5051
 ```
 
 **Critical configuration:**
